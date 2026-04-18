@@ -1,121 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import Header from "./components/Header.jsx";
+import HeroSection from "./components/HeroSection.jsx";
+import DisasterCard from "./components/DisasterCard.jsx";
+import InsightCard from "./components/InsightCard.jsx";
+import OpportunityCard from "./components/OpportunityCard.jsx";
+import WhyItWorksCard from "./components/WhyItWorksCard.jsx";
+import ScoreCard from "./components/ScoreCard.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const article = {
+    title: "Mass flooding disrupts food supply chains across major cities",
+    description:
+      "Flooding has delayed deliveries, damaged transportation routes, and created serious shortages in vulnerable communities.",
+    source: "News API",
+    date: "April 2026",
+  };
+
+  const insight = {
+    problem:
+      "Communities cannot get essential supplies quickly enough during disasters.",
+    affectedGroup:
+      "Families, local stores, drivers, city emergency teams",
+    urgentNeed:
+      "A faster emergency logistics and coordination system",
+    marketGap:
+      "There is no simple real-time local platform for organizing urgent supply delivery",
+  };
+
+  const opportunity = {
+    name: "RapidRelief",
+    summary:
+      "A real-time platform that connects stores, freelance drivers, and local governments to deliver critical supplies during emergencies.",
+    targetUsers:
+      "Cities, residents, local businesses, emergency response groups",
+    revenueModel:
+      "Subscriptions, government contracts, and emergency logistics fees",
+    whyNow:
+      "Climate-related disasters are increasing, and cities need smarter response tools now",
+  };
+
+  const reasons = [
+    "It solves a real urgent problem using live information",
+    "It combines social impact with strong startup potential",
+    "It turns breaking news into actionable innovation",
+    "It is easy for judges to understand and remember",
+  ];
+
+  const scores = {
+    impact: 9,
+    urgency: 10,
+    feasibility: 8,
+    innovation: 9,
+    overall: 9,
+  };
+
+  const handleGenerate = () => {
+    alert("Next step: connect this button to your API logic.");
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="page-shell">
+      <Header />
+      <HeroSection onGenerate={handleGenerate} />
+      <DisasterCard article={article} />
+      <InsightCard insight={insight} />
+      <OpportunityCard opportunity={opportunity} />
+      <WhyItWorksCard reasons={reasons} />
+      <ScoreCard scores={scores} />
+      <div className="footer-space"></div>
+    </div>
+  );
 }
 
-export default App
+export default App;
