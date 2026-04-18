@@ -94,5 +94,6 @@ public class StartupIdea {
     }
 
     public void setNews(News news) {
+
     }
 }
