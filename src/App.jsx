@@ -1,10 +1,10 @@
-import Header from "./components/Header.jsx";
-import HeroSection from "./components/HeroSection.jsx";
-import DisasterCard from "./components/DisasterCard.jsx";
-import InsightCard from "./components/InsightCard.jsx";
-import OpportunityCard from "./components/OpportunityCard.jsx";
-import WhyItWorksCard from "./components/WhyItWorksCard.jsx";
-import ScoreCard from "./components/ScoreCard.jsx";
+import Header from "./components/ui/Header.jsx";
+import HeroSection from "./components/ui/HeroSection.jsx";
+import DisasterCard from "./components/ui/DisasterCard.jsx";
+import InsightCard from "./components/ui/InsightCard.jsx";
+import OpportunityCard from "./components/ui/OpportunityCard.jsx";
+import WhyItWorksCard from "./components/ui/WhyItWorksCard.jsx";
+import ScoreCard from "./components/ui/ScoreCard.jsx";
 
 function App() {
   const article = {
