@@ -1,15 +1,19 @@
-import { clearStartupRecords, getStartupRecords } from '../services/startupService.js';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import StartupList from '../startup/StartupList.jsx';
+import { getAllStartups, clearAllStartupRecords } from '../services/api.js';
 
 const DashboardPage = ({ onLogout }) => {
   const navigate = useNavigate();
   const [startups, setStartups] = useState([]);
 
   useEffect(() => {
-    const storedStartups = JSON.parse(localStorage.getItem('startups')) || [];
-    setStartups(storedStartups);
+    const loadStartups = async () => {
+      const storedStartups = await getAllStartups();
+      setStartups(storedStartups);
+    };
+
+    loadStartups();
   }, []);
 
   const handleLogoutClick = () => {
@@ -18,7 +22,7 @@ const DashboardPage = ({ onLogout }) => {
   };
 
   const handleClearStartups = () => {
-    localStorage.removeItem('startups');
+    clearAllStartupRecords();
     setStartups([]);
   };
 

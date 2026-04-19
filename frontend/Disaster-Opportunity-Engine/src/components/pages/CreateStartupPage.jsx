@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateStartupForm from '../startup/CreateStartupForm.jsx';
 import LoadingSpinner from '../shared/LoadingSpinner.jsx';
 import StartupDetails from '../startup/StartupDetails.jsx';
-import { createStartupRecord } from '../services/startupService.js';
+import { createStartup } from '../services/api.js';
 
 const saveToLocalStorage = (startup) => {
   const existingStartups = JSON.parse(localStorage.getItem('startups')) || [];
@@ -23,13 +23,6 @@ const CreateStartupPage = () => {
     setError('');
     setGeneratedStartup(null);
 
-    const result = await createStartupRecord(formData);
-    setGeneratedStartup(result.startup);
-
-    if (result.mode === 'local') {
-    setError('Backend not connected yet. Showing mock startup result.');
-    } 
-
     const startupPayload = {
       title: `${formData.disaster} Recovery Network`,
       problem: `Communities affected by ${formData.disaster} struggle with recovery coordination.`,
@@ -37,13 +30,16 @@ const CreateStartupPage = () => {
         formData.location || 'target regions'
       } by offering response coordination, resource tracking, and recovery planning tools.`,
       details: formData.details || 'No additional details provided.',
+      location: formData.location || '',
+      industry: formData.industry || '',
+      disaster: formData.disaster || '',
     };
 
     try {
       const newStartup = await createStartup(startupPayload);
       saveToLocalStorage(newStartup);
       setGeneratedStartup(newStartup);
-    } catch (err) {
+    } catch {
       const mockStartup = {
         id: Date.now(),
         ...startupPayload,

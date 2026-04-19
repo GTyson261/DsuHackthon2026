@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getStartupRecordById, deleteStartupRecord } from '../services/startupService.js';
+import { getStartupRecordById, deleteStartupRecord } from '../services/api.js';
 import StartupDetails from '../startup/StartupDetails.jsx';
 
 const ViewStartupPage = () => {

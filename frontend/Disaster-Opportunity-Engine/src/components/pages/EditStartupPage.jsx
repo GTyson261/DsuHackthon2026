@@ -1,6 +1,6 @@
-import { getStartupRecordById, updateStartupRecord } from '../services/startupService.js';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getStartupRecordById, updateStartupRecord } from '../services/api.js';
 import EditStartupForm from '../startup/EditStartupForm.jsx';
 
 const EditStartupPage = () => {
@@ -8,31 +8,30 @@ const EditStartupPage = () => {
   const { id } = useParams();
 
   const [startupToEdit, setStartupToEdit] = useState(null);
-
-useEffect(() => {
-  const loadStartup = async () => {
-    const data = await getStartupRecordById(id);
-    setStartupToEdit(data);
-  };
-
-  loadStartup();
-}, [id]);
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
- const handleSaveStartup = async (updatedStartup) => {
+  useEffect(() => {
+    const loadStartup = async () => {
+      const data = await getStartupRecordById(id);
+      setStartupToEdit(data);
+    };
+
+    loadStartup();
+  }, [id]);
+
+  const handleSaveStartup = async (updatedStartup) => {
     setIsLoading(true);
     setError('');
 
-     try {
-    await updateStartupRecord(id, updatedStartup);
-    navigate(`/startups/${id}`);
-  } catch (err) {
-    setError('Failed to save startup changes.');
-  } finally {
-    setIsLoading(false);
-  }
+    try {
+      await updateStartupRecord(id, updatedStartup);
+      navigate(`/startups/${id}`);
+    } catch {
+      setError('Failed to save startup changes.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!startupToEdit) {
