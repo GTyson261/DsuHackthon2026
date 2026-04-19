@@ -93,9 +93,7 @@ export default function HeroSection({
           onClick={onGenerateIdea}
           disabled={!currentUser || generateLoading}
         >
-          {generateLoading
-            ? 'Generating...'
-            : 'Generate Winning Idea'}
+          {generateLoading ? 'Generating...' : 'Generate Winning Idea'}
         </button>
 
         {dashboardLoading && (

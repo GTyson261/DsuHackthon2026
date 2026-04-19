@@ -26,6 +26,7 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
+// AUTH
 export async function signup(username, password) {
   const params = new URLSearchParams({ username, password });
   return request(`/auth/signup?${params.toString()}`, {
@@ -40,6 +41,7 @@ export async function login(username, password) {
   });
 }
 
+// STARTUP
 export async function generateStartup(userId) {
   return request(`/startups/generate?userId=${encodeURIComponent(userId)}`, {
     method: 'POST',
@@ -50,105 +52,60 @@ export async function getDashboard(userId) {
   return request(`/dashboard/${encodeURIComponent(userId)}`);
 }
 
-export async function getStartupById(id) {
-  return request(`/startups/${encodeURIComponent(id)}`);
+// 🔥 NEW DYNAMIC SCORING FUNCTION
+function calculateScore(problem, solution) {
+  let score = 70;
+
+  if (problem) {
+    const urgencyKeywords = ['crisis', 'flood', 'emergency', 'disaster', 'danger'];
+    urgencyKeywords.forEach((word) => {
+      if (problem.toLowerCase().includes(word)) score += 5;
+    });
+  }
+
+  if (solution) {
+    const strongFeatures = ['real-time', 'alerts', 'ai', 'automation', 'platform'];
+    strongFeatures.forEach((word) => {
+      if (solution.toLowerCase().includes(word)) score += 3;
+    });
+  }
+
+  return Math.min(score, 98);
 }
 
-export async function updateStartup(id, payload) {
-  return request(`/startups/edit/${encodeURIComponent(id)}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function deleteStartup(id) {
-  return request(`/startups/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-  });
-}
-
-/**
- * Makes frontend stable even if backend field names vary a little.
- */
+// NORMALIZER
 export function normalizeStartupPayload(raw) {
   if (!raw) return null;
 
-  const startup =
-    raw.startupIdea ||
-    raw.startup ||
-    raw.idea ||
-    raw.data ||
-    raw;
-
-  const news =
-    raw.news ||
-    raw.article ||
-    startup.news ||
-    null;
-
-  const title =
-    startup.title ||
-    startup.startupTitle ||
-    startup.ideaTitle ||
-    'Generated Startup Idea';
-
-  const description =
-    startup.description ||
-    startup.ideaDescription ||
-    startup.summary ||
-    'No description returned yet.';
-
-  const disasterTitle =
-    news?.title ||
-    raw.disasterTitle ||
-    startup.disasterTitle ||
-    'Live problem signal';
-
-  const disasterDescription =
-    news?.description ||
-    raw.disasterDescription ||
-    startup.disasterDescription ||
-    'A real-world disruption created the opportunity.';
-
-  const source =
-    news?.source ||
-    news?.sourceName ||
-    raw.source ||
-    'News feed';
-
-  const publishedAt =
-    news?.publishedAt ||
-    raw.publishedAt ||
-    startup.publishedAt ||
-    '';
-
-  const opportunityScore =
-    startup.score ||
-    startup.opportunityScore ||
-    raw.score ||
-    92;
-
-  const whyItWorks =
-    startup.whyItWorks ||
-    raw.whyItWorks ||
-    'This idea solves a visible real-world problem, has a clear user need, and feels demo-ready for judges.';
-
-  const insight =
-    startup.insight ||
-    raw.insight ||
-    'A disruption creates urgency. Urgency creates demand. Demand creates room for a focused startup.';
+  const impactLevel =
+    raw.impactLevel ||
+    (raw.problem?.length > 120 ? 'HIGH' : 'MEDIUM');
 
   return {
-    id: startup.id || raw.id || null,
-    title,
-    description,
-    disasterTitle,
-    disasterDescription,
-    source,
-    publishedAt,
-    opportunityScore,
-    whyItWorks,
-    insight,
+    id: raw.ideaId || raw.id || null,
+
+    title: raw.startupTitle || 'Generated Startup Idea',
+    description: raw.startupDescription || 'No description returned yet.',
+
+    disasterTitle: raw.sourceNewsTitle || 'Live problem signal',
+    disasterDescription:
+      raw.problem || 'A real-world disruption created the opportunity.',
+
+    insight: raw.solution || 'The generated solution will appear here.',
+
+    whyItWorks:
+      raw.solution
+        ? `This is a ${impactLevel.toLowerCase()}-impact idea because it directly solves a real-world crisis with a clear, actionable solution.`
+        : 'This idea solves a visible real-world problem and feels demo-ready for judges.',
+
+    // 🔥 DYNAMIC SCORE
+    opportunityScore: calculateScore(raw.problem, raw.solution),
+
+    impactLevel,
+    scoreText: `${impactLevel} impact opportunity`,
+
+    source: 'Disaster → Opportunity Engine',
+    publishedAt: '',
     raw,
   };
 }

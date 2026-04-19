@@ -20,14 +20,11 @@ export default function App() {
     username: '',
     password: '',
   });
-
   const [currentUser, setCurrentUser] = useState(null);
   const [startupData, setStartupData] = useState(null);
-
   const [authLoading, setAuthLoading] = useState(false);
   const [generateLoading, setGenerateLoading] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(false);
-
   const [error, setError] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
 
@@ -57,10 +54,16 @@ export default function App() {
           latestIdea = dashboard;
         }
 
-        const normalized = normalizeStartupPayload(latestIdea);
-        if (normalized) {
-          setStartupData(normalized);
-        }
+        const normalizedDashboard = normalizeStartupPayload(latestIdea);
+        console.log('DASHBOARD RESPONSE:', dashboard);
+        console.log('NORMALIZED DASHBOARD:', normalizedDashboard);
+
+        setStartupData((prev) => {
+          if (prev && Object.keys(prev).length > 0) {
+            return prev;
+          }
+          return normalizedDashboard || prev;
+        });
       } catch (err) {
         console.error('Dashboard load failed:', err);
       } finally {
@@ -93,23 +96,27 @@ export default function App() {
       let response;
 
       if (authMode === 'signup') {
-        response = await signup(credentials.username.trim(), credentials.password.trim());
+        response = await signup(
+          credentials.username.trim(),
+          credentials.password.trim()
+        );
         setStatusMessage('Account created. You can now generate ideas.');
       } else {
-        response = await login(credentials.username.trim(), credentials.password.trim());
+        response = await login(
+          credentials.username.trim(),
+          credentials.password.trim()
+        );
         setStatusMessage('Logged in successfully.');
       }
 
-      const user =
-        response?.user ||
-        response?.data ||
-        response;
+      const user = response?.user || response?.data || response;
 
       setCurrentUser({
         id: user.id || user.userId,
         username: user.username || credentials.username.trim(),
       });
     } catch (err) {
+      console.error(err);
       setError(err.message || 'Authentication failed.');
     } finally {
       setAuthLoading(false);
@@ -128,23 +135,30 @@ export default function App() {
 
     try {
       const response = await generateStartup(currentUser.id);
-      const normalized = normalizeStartupPayload(response);
+      console.log('GENERATE RESPONSE:', response);
 
-      setStartupData(normalized);
+      const normalizedResponse = normalizeStartupPayload(response);
+      console.log('NORMALIZED RESPONSE:', normalizedResponse);
+
+      if (!normalizedResponse) {
+        throw new Error('Normalized response came back empty.');
+      }
+
+      setStartupData(() => normalizedResponse);
       setStatusMessage('Winning idea generated from live backend data.');
     } catch (err) {
+      console.error('GENERATE ERROR:', err);
       setError(err.message || 'Failed to generate startup idea.');
     } finally {
       setGenerateLoading(false);
     }
   };
 
-  const displayData = startupData || {
+  const fallbackData = {
     disasterTitle: 'Recent disaster signal will appear here',
     disasterDescription:
       'Your backend-generated disaster/news event will fill this card.',
-    insight:
-      'The AI insight from the event will show here after generation.',
+    insight: 'The AI insight from the event will show here after generation.',
     title: 'Your startup opportunity will appear here',
     description:
       'The generated business concept from your Spring Boot backend will show here.',
@@ -155,12 +169,18 @@ export default function App() {
     publishedAt: '',
   };
 
+  console.log('RAW startupData state:', startupData);
+
+  const displayData =
+    startupData && Object.keys(startupData).length > 0
+      ? startupData
+      : fallbackData;
+
+  console.log('DISPLAY DATA USED:', displayData);
+
   return (
     <div className="app-shell">
-      <Header
-        appTitle="Disaster → Opportunity Engine"
-        user={currentUser}
-      />
+      <Header appTitle="Disaster → Opportunity Engine" user={currentUser} />
 
       <main className="page-content">
         <HeroSection
@@ -180,31 +200,29 @@ export default function App() {
         />
 
         <section className="cards-grid">
-          <DisasterCard
-            title={displayData.disasterTitle}
-            description={displayData.disasterDescription}
-            source={displayData.source}
-            publishedAt={displayData.publishedAt}
-          />
+  <DisasterCard
+    title={displayData.disasterTitle}
+    description={displayData.disasterDescription}
+    source={displayData.source}
+    publishedAt={displayData.publishedAt}
+  />
 
-          <InsightCard
-            insight={displayData.insight}
-          />
+  <InsightCard insight={displayData.insight} />
 
-          <OpportunityCard
-            title={displayData.title}
-            description={displayData.description}
-            id={displayData.id}
-          />
+  <OpportunityCard
+    title={displayData.title}
+    description={displayData.description}
+    id={displayData.id}
+  />
 
-          <WhyItWorksCard
-            whyItWorks={displayData.whyItWorks}
-          />
+  <WhyItWorksCard whyItWorks={displayData.whyItWorks} />
 
-          <ScoreCard
-            score={displayData.opportunityScore}
-          />
-        </section>
+  <ScoreCard
+  score={displayData.opportunityScore}
+  impactLevel={displayData.impactLevel}
+  scoreText={displayData.scoreText}
+/>
+</section>
       </main>
     </div>
   );

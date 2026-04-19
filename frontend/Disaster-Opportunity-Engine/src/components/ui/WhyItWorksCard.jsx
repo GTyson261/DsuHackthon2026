@@ -8,4 +8,4 @@ export default function WhyItWorksCard({ whyItWorks }) {
       <p className="card-text">{whyItWorks}</p>
     </article>
   );
-} 
+}
