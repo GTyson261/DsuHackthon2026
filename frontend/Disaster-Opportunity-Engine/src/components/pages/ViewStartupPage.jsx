@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getStartupRecordById, deleteStartupRecord } from '../services/startupService.js';
 import StartupDetails from '../startup/StartupDetails.jsx';
 
 const ViewStartupPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const storedStartups = JSON.parse(localStorage.getItem('startups')) || [];
+  const [startup, setStartup] = useState(null);
 
-  const startup = storedStartups.find(
-    (item) => String(item.id) === String(id)
-  );
+  useEffect(() => {
+    const loadStartup = async () => {
+      const data = await getStartupRecordById(id);
+      setStartup(data);
+    };
+
+    loadStartup();
+  }, [id]);
 
   const handleEditStartup = () => {
     navigate(`/startups/${id}/edit`);
@@ -20,12 +26,8 @@ const ViewStartupPage = () => {
     navigate('/dashboard');
   };
 
-  const handleDeleteStartup = () => {
-    const updatedStartups = storedStartups.filter(
-      (item) => String(item.id) !== String(id)
-    );
-
-    localStorage.setItem('startups', JSON.stringify(updatedStartups));
+  const handleDeleteStartup = async () => {
+    await deleteStartupRecord(id);
     navigate('/dashboard');
   };
 

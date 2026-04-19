@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CreateStartupForm from '../startup/CreateStartupForm.jsx';
 import LoadingSpinner from '../shared/LoadingSpinner.jsx';
 import StartupDetails from '../startup/StartupDetails.jsx';
-import { createStartup } from '../services/api.js';
+import { createStartupRecord } from '../services/startupService.js';
 
 const saveToLocalStorage = (startup) => {
   const existingStartups = JSON.parse(localStorage.getItem('startups')) || [];
@@ -11,6 +12,8 @@ const saveToLocalStorage = (startup) => {
 };
 
 const CreateStartupPage = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [generatedStartup, setGeneratedStartup] = useState(null);
@@ -19,6 +22,13 @@ const CreateStartupPage = () => {
     setIsLoading(true);
     setError('');
     setGeneratedStartup(null);
+
+    const result = await createStartupRecord(formData);
+    setGeneratedStartup(result.startup);
+
+    if (result.mode === 'local') {
+    setError('Backend not connected yet. Showing mock startup result.');
+    } 
 
     const startupPayload = {
       title: `${formData.disaster} Recovery Network`,
@@ -65,7 +75,17 @@ const CreateStartupPage = () => {
       )}
 
       {generatedStartup && !isLoading && (
-        <StartupDetails startup={generatedStartup} />
+        <>
+          <StartupDetails startup={generatedStartup} />
+
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            style={{ marginTop: '20px' }}
+          >
+            Go to Dashboard
+          </button>
+        </>
       )}
     </section>
   );

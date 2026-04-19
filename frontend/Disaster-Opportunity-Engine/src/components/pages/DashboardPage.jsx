@@ -1,3 +1,4 @@
+import { clearStartupRecords, getStartupRecords } from '../services/startupService.js';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import StartupList from '../startup/StartupList.jsx';

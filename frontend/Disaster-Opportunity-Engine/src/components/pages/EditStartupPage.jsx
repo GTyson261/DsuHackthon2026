@@ -1,3 +1,4 @@
+import { getStartupRecordById, updateStartupRecord } from '../services/startupService.js';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import EditStartupForm from '../startup/EditStartupForm.jsx';
@@ -6,33 +7,32 @@ const EditStartupPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const storedStartups = JSON.parse(localStorage.getItem('startups')) || [];
+  const [startupToEdit, setStartupToEdit] = useState(null);
 
-  const startupToEdit = storedStartups.find(
-    (item) => String(item.id) === String(id)
-  );
+useEffect(() => {
+  const loadStartup = async () => {
+    const data = await getStartupRecordById(id);
+    setStartupToEdit(data);
+  };
+
+  loadStartup();
+}, [id]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSaveStartup = (updatedStartup) => {
+ const handleSaveStartup = async (updatedStartup) => {
     setIsLoading(true);
     setError('');
 
-    try {
-      const startups = JSON.parse(localStorage.getItem('startups')) || [];
-
-      const updatedStartups = startups.map((startup) =>
-        String(startup.id) === String(id) ? updatedStartup : startup
-      );
-
-      localStorage.setItem('startups', JSON.stringify(updatedStartups));
-      navigate(`/startups/${updatedStartup.id}`);
-    } catch (err) {
-      setError('Failed to save startup changes.');
-    } finally {
-      setIsLoading(false);
-    }
+     try {
+    await updateStartupRecord(id, updatedStartup);
+    navigate(`/startups/${id}`);
+  } catch (err) {
+    setError('Failed to save startup changes.');
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   if (!startupToEdit) {

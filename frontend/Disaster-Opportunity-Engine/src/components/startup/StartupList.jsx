@@ -20,6 +20,10 @@ const StartupList = ({ startups = [], onSelectStartup }) => {
           </p>
 
           <p className="startup-list-text">
+            <strong>Total Score:</strong> {startup.totalScore ?? 'N/A'}
+          </p>
+
+          <p className="startup-list-text">
             <strong>Solution:</strong> {startup.solution}
           </p>
 
