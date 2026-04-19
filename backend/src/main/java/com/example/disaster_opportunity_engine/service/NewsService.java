@@ -3,9 +3,10 @@ package com.example.disaster_opportunity_engine.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -25,8 +26,18 @@ public class NewsService {
     }
 
     public NewsArticle fetchTopDisasterArticle() {
-        String url = "https://newsapi.org/v2/everything?q=disaster OR earthquake OR flood OR wildfire OR hurricane"
-                + "&language=en&sortBy=publishedAt&pageSize=1&apiKey=" + newsApiKey;
+        if (newsApiKey == null || newsApiKey.isBlank()) {
+            throw new RuntimeException("NEWS_API_KEY is missing.");
+        }
+
+        String url = UriComponentsBuilder
+                .fromHttpUrl("https://newsapi.org/v2/everything")
+                .queryParam("q", "disaster OR earthquake OR flood OR wildfire OR hurricane")
+                .queryParam("language", "en")
+                .queryParam("sortBy", "publishedAt")
+                .queryParam("pageSize", 1)
+                .queryParam("apiKey", newsApiKey)
+                .toUriString();
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -36,6 +47,11 @@ public class NewsService {
 
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
+
+            if (!"ok".equalsIgnoreCase(root.path("status").asText())) {
+                throw new RuntimeException("News API error: " + root.path("message").asText("Unknown error"));
+            }
+
             JsonNode articles = root.path("articles");
 
             if (!articles.isArray() || articles.isEmpty()) {

@@ -2,27 +2,26 @@ package com.example.disaster_opportunity_engine.service;
 
 import com.example.disaster_opportunity_engine.model.User;
 import com.example.disaster_opportunity_engine.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User registerUser(String username, String password) {
-        Optional<User> existing = userRepository.findByUsername(username);
-
-        if (existing.isPresent()) {
+        userRepository.findByUsername(username).ifPresent(user -> {
             throw new RuntimeException("Username already exists.");
-        }
+        });
 
-        User user = new User(username, password);
+        User user = new User(username, passwordEncoder.encode(password));
         return userRepository.save(user);
     }
 
@@ -30,7 +29,7 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password.");
         }
 

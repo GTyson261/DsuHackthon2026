@@ -36,4 +36,10 @@ public class StartupController {
     ) {
         return startupService.updateIdea(id, title, description);
     }
+
+    @DeleteMapping("/{id}")
+    public String deleteStartup(@PathVariable Integer id) {
+        startupService.deleteIdea(id);
+        return "Startup idea deleted successfully.";
+    }
 }

@@ -74,9 +74,19 @@ public class AIService {
 
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
-            String content = root.path("choices").get(0).path("message").path("content").asText();
+            JsonNode choices = root.path("choices");
 
-            JsonNode aiJson = objectMapper.readTree(content);
+            if (!choices.isArray() || choices.isEmpty()) {
+                throw new RuntimeException("OpenAI returned no choices.");
+            }
+
+            String content = choices.get(0).path("message").path("content").asText();
+            if (content == null || content.isBlank()) {
+                throw new RuntimeException("OpenAI returned empty content.");
+            }
+
+            String cleanedContent = stripCodeFences(content);
+            JsonNode aiJson = objectMapper.readTree(cleanedContent);
 
             return new AIResult(
                     aiJson.path("title").asText("Generated Startup Idea"),
@@ -92,6 +102,18 @@ public class AIService {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private String stripCodeFences(String content) {
+        String cleaned = content.trim();
+
+        if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replaceFirst("^```json\\s*", "");
+            cleaned = cleaned.replaceFirst("^```\\s*", "");
+            cleaned = cleaned.replaceFirst("\\s*```$", "");
+        }
+
+        return cleaned.trim();
     }
 
     public record AIResult(

@@ -18,17 +18,25 @@ public class StartupService {
     }
 
     public StartupIdea createIdea(String title, String description, User user, News news) {
+        if (user == null || user.getId() == null) {
+            throw new RuntimeException("Valid user is required to create an idea.");
+        }
+        if (news == null || news.getId() == null) {
+            throw new RuntimeException("Valid news record is required to create an idea.");
+        }
+
         StartupIdea idea = new StartupIdea();
         idea.setTitle(title);
         idea.setDescription(description);
         idea.setStatus("CREATED");
         idea.setUser(user);
         idea.setNews(news);
+
         return startupRepository.save(idea);
     }
 
-    public List<StartupIdea> getDashboardIdeas(User user) {
-        return startupRepository.findByUser(user);
+    public List<StartupIdea> getDashboardIdeas(Integer userId) {
+        return startupRepository.findByUserId(userId);
     }
 
     public StartupIdea getIdeaById(Integer id) {
@@ -42,5 +50,10 @@ public class StartupService {
         idea.setDescription(description);
         idea.setStatus("UPDATED");
         return startupRepository.save(idea);
+    }
+
+    public void deleteIdea(Integer id) {
+        StartupIdea idea = getIdeaById(id);
+        startupRepository.delete(idea);
     }
 }

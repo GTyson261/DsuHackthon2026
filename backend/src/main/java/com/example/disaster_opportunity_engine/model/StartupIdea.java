@@ -24,6 +24,10 @@ public class StartupIdea {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "news_id")
+    private News news;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -31,6 +35,7 @@ public class StartupIdea {
     private LocalDateTime updatedAt;
 
     public StartupIdea() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public StartupIdea(String title, String description, String status, User user) {
@@ -55,7 +60,7 @@ public class StartupIdea {
 
     public void setTitle(String title) {
         this.title = title;
-        this.updatedAt = LocalDateTime.now();
+        touch();
     }
 
     public String getDescription() {
@@ -64,7 +69,7 @@ public class StartupIdea {
 
     public void setDescription(String description) {
         this.description = description;
-        this.updatedAt = LocalDateTime.now();
+        touch();
     }
 
     public String getStatus() {
@@ -73,7 +78,7 @@ public class StartupIdea {
 
     public void setStatus(String status) {
         this.status = status;
-        this.updatedAt = LocalDateTime.now();
+        touch();
     }
 
     public User getUser() {
@@ -82,7 +87,16 @@ public class StartupIdea {
 
     public void setUser(User user) {
         this.user = user;
-        this.updatedAt = LocalDateTime.now();
+        touch();
+    }
+
+    public News getNews() {
+        return news;
+    }
+
+    public void setNews(News news) {
+        this.news = news;
+        touch();
     }
 
     public LocalDateTime getCreatedAt() {
@@ -93,7 +107,7 @@ public class StartupIdea {
         return updatedAt;
     }
 
-    public void setNews(News news) {
-
+    private void touch() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
