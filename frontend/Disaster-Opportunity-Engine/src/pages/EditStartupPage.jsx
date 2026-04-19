@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import EditStartupForm from '../components/startup/EditStartupForm';
+import EditStartupForm from '../startup/EditStartupForm.jsx';
 
 const mockStartups = [
   {
