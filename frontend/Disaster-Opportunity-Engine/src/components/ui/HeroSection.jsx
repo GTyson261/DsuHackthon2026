@@ -1,67 +1,108 @@
-function HeroSection({ onGenerate }) {
+import React from 'react';
+
+export default function HeroSection({
+  authMode,
+  setAuthMode,
+  credentials,
+  onCredentialChange,
+  onAuthSubmit,
+  onGenerateIdea,
+  authLoading,
+  generateLoading,
+  dashboardLoading,
+  canSubmitAuth,
+  currentUser,
+  error,
+  statusMessage,
+}) {
   return (
-    <section id="hero" className="hero">
-      <div className="section-wrap">
-        <div className="hero-card">
-          <div className="hero-grid">
-            <div className="hero-copy">
-              <div className="section-eyebrow">Hackathon Innovation Engine</div>
+    <section className="hero-section">
+      <div className="hero-copy">
+        <p className="eyebrow">AI + News + Startups</p>
+        <h2 className="hero-title">Turn bad events into winning startup ideas.</h2>
+        <p className="hero-text">
+          Disaster → Opportunity Engine watches real-world disruption and transforms
+          it into practical startup concepts judges can understand immediately.
+        </p>
 
-              <h1>Turn global disasters into the next big startup idea.</h1>
-
-              <p>
-                We scan breaking crisis news, uncover urgent real-world
-                problems, and transform them into high-impact business
-                opportunities using AI.
-              </p>
-
-              <div className="hero-badges">
-                <span className="hero-badge">Live News Analysis</span>
-                <span className="hero-badge">AI Opportunity Discovery</span>
-                <span className="hero-badge">Startup Scoring</span>
-              </div>
-
-              <div className="hero-actions">
-                <button className="primary-btn" onClick={onGenerate}>
-                  Generate Winning Idea
-                </button>
-
-                <a href="#disaster" className="secondary-btn demo-link">
-                  Explore Demo
-                </a>
-              </div>
-            </div>
-
-            <div className="hero-side">
-              <div className="hero-logo-panel">
-                <img
-                  src="/Disaster-Opportunity.png"
-                  alt="Disaster Opportunity Engine brand graphic"
-                  className="hero-logo"
-                />
-              </div>
-
-              <div className="hero-stat floating-card">
-                <div className="hero-stat-label">Latest Problem Signal</div>
-                <div className="hero-stat-value">Supply Chain Crisis</div>
-                <div className="hero-stat-note">
-                  AI found an urgent gap in emergency delivery systems
-                </div>
-              </div>
-
-              <div className="hero-stat floating-card delay-1">
-                <div className="hero-stat-label">Generated Startup</div>
-                <div className="hero-stat-value">RapidRelief</div>
-                <div className="hero-stat-note">
-                  A platform for fast emergency logistics coordination
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="hero-badges">
+          <span>Spring Boot</span>
+          <span>MySQL</span>
+          <span>React + Vite</span>
+          <span>AI Generation</span>
         </div>
+      </div>
+
+      <div className="hero-panel">
+        <div className="mode-toggle">
+          <button
+            className={authMode === 'login' ? 'toggle-btn active' : 'toggle-btn'}
+            onClick={() => setAuthMode('login')}
+            type="button"
+          >
+            Login
+          </button>
+          <button
+            className={authMode === 'signup' ? 'toggle-btn active' : 'toggle-btn'}
+            onClick={() => setAuthMode('signup')}
+            type="button"
+          >
+            Sign Up
+          </button>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            value={credentials.username}
+            onChange={onCredentialChange}
+            placeholder="Enter username"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={credentials.password}
+            onChange={onCredentialChange}
+            placeholder="Enter password"
+          />
+        </div>
+
+        <button
+          className="primary-btn"
+          type="button"
+          onClick={onAuthSubmit}
+          disabled={!canSubmitAuth || authLoading}
+        >
+          {authLoading
+            ? 'Please wait...'
+            : authMode === 'signup'
+            ? 'Create Account'
+            : 'Login'}
+        </button>
+
+        <button
+          className="accent-btn"
+          type="button"
+          onClick={onGenerateIdea}
+          disabled={!currentUser || generateLoading}
+        >
+          {generateLoading ? 'Generating...' : 'Generate Winning Idea'}
+        </button>
+
+        {dashboardLoading && (
+          <p className="helper-text">Loading your latest dashboard data...</p>
+        )}
+
+        {statusMessage && <p className="success-text">{statusMessage}</p>}
+        {error && <p className="error-text">{error}</p>}
       </div>
     </section>
   );
 }
-
-export default HeroSection;

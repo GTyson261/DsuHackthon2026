@@ -1,30 +1,16 @@
-function Header() {
+import React from 'react';
+
+export default function Header({ appTitle, user }) {
   return (
-    <header className="header">
-      <div className="header-inner">
-        <div className="logo-block">
-          <img
-            src="/Disaster-Opportunity.png"
-            alt="Disaster Opportunity Engine logo"
-            className="site-logo"
-          />
+    <header className="site-header">
+      <div>
+        <p className="eyebrow">Hackathon Demo</p>
+        <h1 className="site-title">{appTitle}</h1>
+      </div>
 
-          <div className="logo-text">
-            <p className="logo-title">Disaster → Opportunity Engine</p>
-            <p className="logo-subtitle">AI that finds innovation in chaos</p>
-          </div>
-        </div>
-
-        <nav className="nav">
-          <a href="#hero">Home</a>
-          <a href="#disaster">Disaster</a>
-          <a href="#insight">Insight</a>
-          <a href="#opportunity">Opportunity</a>
-          <a href="#score">Score</a>
-        </nav>
+      <div className="user-pill">
+        {user ? `Logged in as ${user.username}` : 'Not logged in'}
       </div>
     </header>
   );
 }
-
-export default Header;

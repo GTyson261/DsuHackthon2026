@@ -1,26 +1,11 @@
-function WhyItWorksCard({ reasons }) {
-  if (!reasons || reasons.length === 0) return null;
+import React from 'react';
 
+export default function WhyItWorksCard({ whyItWorks }) {
   return (
-    <section className="section-wrap section-space">
-      <div className="glass-card section-card">
-        <div className="card-top">
-          <div>
-            <div className="section-eyebrow">Why It Works</div>
-            <h2 className="section-title">What makes this a winning concept</h2>
-          </div>
-
-          <div className="card-icon">🏆</div>
-        </div>
-
-        <ul className="bullet-list">
-          {reasons.map((reason, index) => (
-            <li key={index}>{reason}</li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <article className="card">
+      <p className="card-label">Why It Wins</p>
+      <h3 className="card-title">Judge Appeal</h3>
+      <p className="card-text">{whyItWorks}</p>
+    </article>
   );
 }
-
-export default WhyItWorksCard;

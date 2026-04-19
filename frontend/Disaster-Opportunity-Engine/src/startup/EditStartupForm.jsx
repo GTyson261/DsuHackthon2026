@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import ErrorMessage from "../shared/ErrorMessage";
-import GenerateButton from '../shared/GenerateButton.jsx';
+import ErrorMessage from "../components/shared/ErrorMessage.jsx";
+import GenerateButton from '../components/shared/GenerateButton.jsx';
 
 const EditStartupForm = ({
   startup,
