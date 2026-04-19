@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import StartupList from '../startup/StartupList.jsx';
 import { getAllStartups, clearAllStartupRecords } from '../services/api.js';
 
 const DashboardPage = ({ onLogout }) => {
-  const navigate = useNavigate();
+ const navigate = useNavigate();
+ const location = useLocation();
+ 
   const [startups, setStartups] = useState([]);
 
   useEffect(() => {
-    const loadStartups = async () => {
-      const storedStartups = await getAllStartups();
-      setStartups(storedStartups);
-    };
+  const loadStartups = async () => {
+    const storedStartups = await getAllStartups();
+    setStartups(storedStartups);
+  };
 
-    loadStartups();
-  }, []);
+  loadStartups();
+}, [location.pathname]);
 
   const handleLogoutClick = () => {
     onLogout();

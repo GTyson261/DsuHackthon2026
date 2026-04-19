@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 const LoginSignupPage = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
 
@@ -14,9 +15,10 @@ const LoginSignupPage = ({ setIsLoggedIn }) => {
     return;
   }
 
+  localStorage.setItem('currentUser', email);
   setIsLoggedIn();
   navigate('/dashboard');
-};
+  };
 
   return (
     <section>

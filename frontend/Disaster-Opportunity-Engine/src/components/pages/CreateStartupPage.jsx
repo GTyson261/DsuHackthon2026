@@ -6,9 +6,11 @@ import StartupDetails from '../startup/StartupDetails.jsx';
 import { createStartup } from '../services/api.js';
 
 const saveToLocalStorage = (startup) => {
-  const existingStartups = JSON.parse(localStorage.getItem('startups')) || [];
+  const currentUser = localStorage.getItem('currentUser') || 'guest';
+  const storageKey = `startups_${currentUser}`;
+  const existingStartups = JSON.parse(localStorage.getItem(storageKey)) || [];
   const updatedStartups = [startup, ...existingStartups];
-  localStorage.setItem('startups', JSON.stringify(updatedStartups));
+  localStorage.setItem(storageKey, JSON.stringify(updatedStartups));
 };
 
 const calculateScores = (formData) => {

@@ -1,9 +1,12 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
+const getStartupStorageKey = () => {
+  const currentUser = localStorage.getItem('currentUser') || 'guest';
+  return `startups_${currentUser}`;
+};
 
-  //CREATE STARTUP//
-
+// CREATE STARTUP
 export const createStartup = async (startupData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/startups`, {
@@ -25,9 +28,7 @@ export const createStartup = async (startupData) => {
   }
 };
 
-
- //GET ALL STARTUPS//
- 
+// GET ALL STARTUPS
 export const getAllStartups = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/startups`);
@@ -36,13 +37,12 @@ export const getAllStartups = async () => {
 
     return await response.json();
   } catch {
-    return JSON.parse(localStorage.getItem('startups')) || [];
+    const storageKey = getStartupStorageKey();
+    return JSON.parse(localStorage.getItem(storageKey)) || [];
   }
 };
 
-
-  //Get Startup by ID//
-
+// GET STARTUP BY ID
 export const getStartupRecordById = async (id) => {
   try {
     const response = await fetch(`${API_BASE_URL}/startups/${id}`);
@@ -51,14 +51,13 @@ export const getStartupRecordById = async (id) => {
 
     return await response.json();
   } catch {
-    const stored = JSON.parse(localStorage.getItem('startups')) || [];
+    const storageKey = getStartupStorageKey();
+    const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
     return stored.find((s) => String(s.id) === String(id)) || null;
   }
 };
 
-
-  //Update Startup//
- 
+// UPDATE STARTUP
 export const updateStartupRecord = async (id, updatedStartup) => {
   try {
     const response = await fetch(`${API_BASE_URL}/startups/${id}`, {
@@ -73,34 +72,34 @@ export const updateStartupRecord = async (id, updatedStartup) => {
 
     return await response.json();
   } catch {
-    const stored = JSON.parse(localStorage.getItem('startups')) || [];
+    const storageKey = getStartupStorageKey();
+    const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
 
     const updated = stored.map((s) =>
       String(s.id) === String(id) ? updatedStartup : s
     );
 
-    localStorage.setItem('startups', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
     return updatedStartup;
   }
 };
 
-
- //Delete Startup//
-
+// DELETE STARTUP
 export const deleteStartupRecord = async (id) => {
   try {
     await fetch(`${API_BASE_URL}/startups/${id}`, {
       method: 'DELETE',
     });
   } catch {
-    const stored = JSON.parse(localStorage.getItem('startups')) || [];
+    const storageKey = getStartupStorageKey();
+    const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
     const updated = stored.filter((s) => String(s.id) !== String(id));
-    localStorage.setItem('startups', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
   }
 };
 
-//Clear All Startup//
-
+// CLEAR ALL STARTUPS
 export const clearAllStartupRecords = () => {
-  localStorage.removeItem('startups');
+  const storageKey = getStartupStorageKey();
+  localStorage.removeItem(storageKey);
 };
