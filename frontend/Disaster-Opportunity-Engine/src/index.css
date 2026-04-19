@@ -283,6 +283,7 @@ button {
   line-height: 1;
   margin: 8px 0 12px;
   background: linear-gradient(135deg, #ffffff, #86e2ff);
+  background-clip: text;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -422,6 +423,7 @@ button {
   line-height: 0.95;
   margin: 0;
   background: linear-gradient(135deg, #ffffff, #9fe8ff);
+  background-clip: text;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -566,4 +568,58 @@ button {
   .score-visual-wrap {
     grid-template-columns: 220px 1fr;
   }
+}
+.generate-btn {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 0 rgba(0, 255, 200, 0);
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 255, 200, 0.18);
+}
+
+.generate-btn:active {
+  transform: scale(0.97);
+}
+
+.generate-btn.loading {
+  animation: pulseGlow 1.4s infinite ease-in-out;
+}
+
+.generate-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.35),
+    transparent
+  );
+  transform: skewX(-20deg);
+}
+
+.generate-btn:hover::after {
+  animation: shimmer 1s ease;
+}
+
+@keyframes shimmer {
+  0% { left: -120%; }
+  100% { left: 140%; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(0,255,200,0.08); }
+  50% { box-shadow: 0 0 30px rgba(0,255,200,0.35); }
 }

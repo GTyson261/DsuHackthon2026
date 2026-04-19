@@ -6,6 +6,7 @@ import InsightCard from './components/ui/InsightCard';
 import OpportunityCard from './components/ui/OpportunityCard';
 import WhyItWorksCard from './components/ui/WhyItWorksCard';
 import ScoreCard from './components/ui/ScoreCard';
+import GenerateStatus from './components/ui/GenerateStatus';
 import {
   login,
   signup,
@@ -13,6 +14,7 @@ import {
   getDashboard,
   normalizeStartupPayload,
 } from './services/api';
+import './wow.css';
 
 export default function App() {
   const [authMode, setAuthMode] = useState('login');
@@ -55,8 +57,6 @@ export default function App() {
         }
 
         const normalizedDashboard = normalizeStartupPayload(latestIdea);
-        console.log('DASHBOARD RESPONSE:', dashboard);
-        console.log('NORMALIZED DASHBOARD:', normalizedDashboard);
 
         setStartupData((prev) => {
           if (prev && Object.keys(prev).length > 0) {
@@ -135,17 +135,14 @@ export default function App() {
 
     try {
       const response = await generateStartup(currentUser.id);
-      console.log('GENERATE RESPONSE:', response);
-
       const normalizedResponse = normalizeStartupPayload(response);
-      console.log('NORMALIZED RESPONSE:', normalizedResponse);
 
       if (!normalizedResponse) {
         throw new Error('Normalized response came back empty.');
       }
 
-      setStartupData(() => normalizedResponse);
-      setStatusMessage('Winning idea generated from live backend data.');
+      setStartupData(normalizedResponse);
+      setStatusMessage('A new opportunity was generated from live event data.');
     } catch (err) {
       console.error('GENERATE ERROR:', err);
       setError(err.message || 'Failed to generate startup idea.');
@@ -155,31 +152,34 @@ export default function App() {
   };
 
   const fallbackData = {
-    disasterTitle: 'Recent disaster signal will appear here',
+    disasterTitle: 'Recent live event signal will appear here',
     disasterDescription:
-      'Your backend-generated disaster/news event will fill this card.',
-    insight: 'The AI insight from the event will show here after generation.',
+      'Your backend-generated weather, disaster, or community-impact event will fill this card.',
+    insight: 'The AI insight from the live event will show here after generation.',
     title: 'Your startup opportunity will appear here',
     description:
-      'The generated business concept from your Spring Boot backend will show here.',
+      'The generated business concept from your backend will show here.',
     opportunityScore: 92,
     whyItWorks:
-      'This card explains why the idea is practical, urgent, and compelling to hackathon judges.',
-    source: 'News/API source',
+      'This explains why the idea is practical, timely, and useful in a real-world situation.',
+    source: 'Live event/API source',
     publishedAt: '',
+    impactLevel: 'MEDIUM',
+    scoreText: 'MEDIUM impact opportunity',
   };
-
-  console.log('RAW startupData state:', startupData);
 
   const displayData =
     startupData && Object.keys(startupData).length > 0
       ? startupData
       : fallbackData;
 
-  console.log('DISPLAY DATA USED:', displayData);
+  const impactClass =
+    displayData?.impactLevel?.toLowerCase() === 'high'
+      ? 'high-impact'
+      : 'medium-impact';
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${impactClass}`}>
       <Header appTitle="Disaster → Opportunity Engine" user={currentUser} />
 
       <main className="page-content">
@@ -199,30 +199,46 @@ export default function App() {
           statusMessage={statusMessage}
         />
 
+        <GenerateStatus active={generateLoading} />
+
+        <h2 className="results-headline">
+          Turning live events into practical startup opportunities.
+        </h2>
+
         <section className="cards-grid">
-  <DisasterCard
-    title={displayData.disasterTitle}
-    description={displayData.disasterDescription}
-    source={displayData.source}
-    publishedAt={displayData.publishedAt}
-  />
+          <div className="reveal-card delay-1">
+            <DisasterCard
+              title={displayData.disasterTitle}
+              description={displayData.disasterDescription}
+              source={displayData.source}
+              publishedAt={displayData.publishedAt}
+            />
+          </div>
 
-  <InsightCard insight={displayData.insight} />
+          <div className="reveal-card delay-2">
+            <InsightCard insight={displayData.insight} />
+          </div>
 
-  <OpportunityCard
-    title={displayData.title}
-    description={displayData.description}
-    id={displayData.id}
-  />
+          <div className="reveal-card delay-3">
+            <OpportunityCard
+              title={displayData.title}
+              description={displayData.description}
+              id={displayData.id}
+            />
+          </div>
 
-  <WhyItWorksCard whyItWorks={displayData.whyItWorks} />
+          <div className="reveal-card delay-4">
+            <WhyItWorksCard whyItWorks={displayData.whyItWorks} />
+          </div>
 
-  <ScoreCard
-  score={displayData.opportunityScore}
-  impactLevel={displayData.impactLevel}
-  scoreText={displayData.scoreText}
-/>
-</section>
+          <div className="reveal-card delay-5">
+            <ScoreCard
+              score={displayData.opportunityScore}
+              impactLevel={displayData.impactLevel}
+              scoreText={displayData.scoreText}
+            />
+          </div>
+        </section>
       </main>
     </div>
   );
