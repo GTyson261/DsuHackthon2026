@@ -1,3 +1,5 @@
+import logo from "../../assets/Disaster-Opportunity-Engine.png";
+
 function HeroSection({ onGenerate }) {
   return (
     <section id="hero" className="hero">
@@ -5,7 +7,7 @@ function HeroSection({ onGenerate }) {
         <div className="hero-card">
           <div className="hero-grid">
             <div className="hero-copy">
-              <div className="section-eyebrow">Hackathon Innovation Engine</div>
+              
 
               <h1>Turn global disasters into the next big startup idea.</h1>
 
@@ -35,7 +37,7 @@ function HeroSection({ onGenerate }) {
             <div className="hero-side">
               <div className="hero-logo-panel">
                 <img
-                  src="/Disaster-Opportunity.png"
+                  src={logo}
                   alt="Disaster Opportunity Engine brand graphic"
                   className="hero-logo"
                 />
