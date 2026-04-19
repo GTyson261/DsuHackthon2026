@@ -1,6 +1,8 @@
 package com.example.disaster_opportunity_engine.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,6 +16,8 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String username;
 
+    // 🔐 Hide password from API responses
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false, length = 255)
     private String password;
 

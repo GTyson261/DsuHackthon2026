@@ -26,55 +26,72 @@ public class NewsService {
     }
 
     public NewsArticle fetchTopDisasterArticle() {
-        if (newsApiKey == null || newsApiKey.isBlank()) {
-            throw new RuntimeException("NEWS_API_KEY is missing.");
-        }
-
-        String url = UriComponentsBuilder
-                .fromHttpUrl("https://newsapi.org/v2/everything")
-                .queryParam("q", "disaster OR earthquake OR flood OR wildfire OR hurricane")
-                .queryParam("language", "en")
-                .queryParam("sortBy", "publishedAt")
-                .queryParam("pageSize", 1)
-                .queryParam("apiKey", newsApiKey)
-                .toUriString();
-
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new RuntimeException("Failed to fetch news from News API.");
-        }
-
         try {
-            JsonNode root = objectMapper.readTree(response.getBody());
-
-            if (!"ok".equalsIgnoreCase(root.path("status").asText())) {
-                throw new RuntimeException("News API error: " + root.path("message").asText("Unknown error"));
+            if (newsApiKey == null || newsApiKey.isBlank()) {
+                return fallbackArticle("Missing NEWS_API_KEY.");
             }
 
+            String url = UriComponentsBuilder
+                    .fromHttpUrl("https://newsapi.org/v2/everything")
+                    .queryParam("q", "disaster OR earthquake OR flood OR wildfire OR hurricane")
+                    .queryParam("language", "en")
+                    .queryParam("sortBy", "publishedAt")
+                    .queryParam("pageSize", 1)
+                    .queryParam("apiKey", newsApiKey)
+                    .toUriString();
+
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                return fallbackArticle("News API request failed.");
+            }
+
+            JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode articles = root.path("articles");
 
-            if (!articles.isArray() || articles.isEmpty()) {
-                return null;
+            if (articles.isArray() && !articles.isEmpty()) {
+                JsonNode first = articles.get(0);
+
+                String title = first.path("title").asText("Untitled disaster article");
+                String description = first.path("description").asText("No description available.");
+                String source = first.path("source").path("name").asText("Unknown source");
+                String articleUrl = first.path("url").asText("https://example.com");
+                String publishedAtRaw = first.path("publishedAt").asText("");
+
+                LocalDateTime publishedAt = LocalDateTime.now();
+                if (!publishedAtRaw.isBlank()) {
+                    try {
+                        publishedAt = OffsetDateTime.parse(publishedAtRaw).toLocalDateTime();
+                    } catch (Exception ignored) {
+                        publishedAt = LocalDateTime.now();
+                    }
+                }
+
+                return new NewsArticle(
+                        title,
+                        description,
+                        source,
+                        articleUrl,
+                        publishedAt
+                );
             }
 
-            JsonNode first = articles.get(0);
+            return fallbackArticle("No disaster articles returned by News API.");
 
-            String title = first.path("title").asText("");
-            String description = first.path("description").asText("");
-            String source = first.path("source").path("name").asText("");
-            String articleUrl = first.path("url").asText("");
-            String publishedAtRaw = first.path("publishedAt").asText("");
-
-            LocalDateTime publishedAt = null;
-            if (!publishedAtRaw.isBlank()) {
-                publishedAt = OffsetDateTime.parse(publishedAtRaw).toLocalDateTime();
-            }
-
-            return new NewsArticle(title, description, source, articleUrl, publishedAt);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse news response.", e);
+            e.printStackTrace();
+            return fallbackArticle("Exception while fetching news.");
         }
+    }
+
+    private NewsArticle fallbackArticle(String reason) {
+        return new NewsArticle(
+                "Demo Disaster: Flood Crisis",
+                "Heavy flooding has impacted thousands. Fallback article used because: " + reason,
+                "Fallback Source",
+                "https://example.com",
+                LocalDateTime.now()
+        );
     }
 
     public record NewsArticle(
