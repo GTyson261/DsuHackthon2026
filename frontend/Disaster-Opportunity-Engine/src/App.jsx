@@ -1,121 +1,211 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useEffect, useMemo, useState } from 'react';
+import Header from './components/ui/Header';
+import HeroSection from './components/ui/HeroSection';
+import DisasterCard from './components/ui/DisasterCard';
+import InsightCard from './components/ui/InsightCard';
+import OpportunityCard from './components/ui/OpportunityCard';
+import WhyItWorksCard from './components/ui/WhyItWorksCard';
+import ScoreCard from './components/ui/ScoreCard';
+import {
+  login,
+  signup,
+  generateStartup,
+  getDashboard,
+  normalizeStartupPayload,
+} from './services/api';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [authMode, setAuthMode] = useState('login');
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+  });
+
+  const [currentUser, setCurrentUser] = useState(null);
+  const [startupData, setStartupData] = useState(null);
+
+  const [authLoading, setAuthLoading] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+
+  const [error, setError] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const canSubmitAuth = useMemo(() => {
+    return credentials.username.trim() && credentials.password.trim();
+  }, [credentials]);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    const loadDashboard = async () => {
+      try {
+        setDashboardLoading(true);
+        const dashboard = await getDashboard(currentUser.id);
+
+        let latestIdea = null;
+
+        if (Array.isArray(dashboard)) {
+          latestIdea = dashboard[0] || null;
+        } else if (Array.isArray(dashboard?.startups)) {
+          latestIdea = dashboard.startups[0] || null;
+        } else if (Array.isArray(dashboard?.startupIdeas)) {
+          latestIdea = dashboard.startupIdeas[0] || null;
+        } else if (dashboard?.latestStartup) {
+          latestIdea = dashboard.latestStartup;
+        } else {
+          latestIdea = dashboard;
+        }
+
+        const normalized = normalizeStartupPayload(latestIdea);
+        if (normalized) {
+          setStartupData(normalized);
+        }
+      } catch (err) {
+        console.error('Dashboard load failed:', err);
+      } finally {
+        setDashboardLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [currentUser]);
+
+  const handleCredentialChange = (event) => {
+    const { name, value } = event.target;
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAuthSubmit = async () => {
+    if (!canSubmitAuth) {
+      setError('Enter both username and password.');
+      return;
+    }
+
+    setError('');
+    setStatusMessage('');
+    setAuthLoading(true);
+
+    try {
+      let response;
+
+      if (authMode === 'signup') {
+        response = await signup(credentials.username.trim(), credentials.password.trim());
+        setStatusMessage('Account created. You can now generate ideas.');
+      } else {
+        response = await login(credentials.username.trim(), credentials.password.trim());
+        setStatusMessage('Logged in successfully.');
+      }
+
+      const user =
+        response?.user ||
+        response?.data ||
+        response;
+
+      setCurrentUser({
+        id: user.id || user.userId,
+        username: user.username || credentials.username.trim(),
+      });
+    } catch (err) {
+      setError(err.message || 'Authentication failed.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleGenerateIdea = async () => {
+    if (!currentUser?.id) {
+      setError('Log in or sign up first to generate a startup idea.');
+      return;
+    }
+
+    setGenerateLoading(true);
+    setError('');
+    setStatusMessage('');
+
+    try {
+      const response = await generateStartup(currentUser.id);
+      const normalized = normalizeStartupPayload(response);
+
+      setStartupData(normalized);
+      setStatusMessage('Winning idea generated from live backend data.');
+    } catch (err) {
+      setError(err.message || 'Failed to generate startup idea.');
+    } finally {
+      setGenerateLoading(false);
+    }
+  };
+
+  const displayData = startupData || {
+    disasterTitle: 'Recent disaster signal will appear here',
+    disasterDescription:
+      'Your backend-generated disaster/news event will fill this card.',
+    insight:
+      'The AI insight from the event will show here after generation.',
+    title: 'Your startup opportunity will appear here',
+    description:
+      'The generated business concept from your Spring Boot backend will show here.',
+    opportunityScore: 92,
+    whyItWorks:
+      'This card explains why the idea is practical, urgent, and compelling to hackathon judges.',
+    source: 'News/API source',
+    publishedAt: '',
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-shell">
+      <Header
+        appTitle="Disaster → Opportunity Engine"
+        user={currentUser}
+      />
 
-      <div className="ticks"></div>
+      <main className="page-content">
+        <HeroSection
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          credentials={credentials}
+          onCredentialChange={handleCredentialChange}
+          onAuthSubmit={handleAuthSubmit}
+          onGenerateIdea={handleGenerateIdea}
+          authLoading={authLoading}
+          generateLoading={generateLoading}
+          dashboardLoading={dashboardLoading}
+          canSubmitAuth={canSubmitAuth}
+          currentUser={currentUser}
+          error={error}
+          statusMessage={statusMessage}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <section className="cards-grid">
+          <DisasterCard
+            title={displayData.disasterTitle}
+            description={displayData.disasterDescription}
+            source={displayData.source}
+            publishedAt={displayData.publishedAt}
+          />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          <InsightCard
+            insight={displayData.insight}
+          />
+
+          <OpportunityCard
+            title={displayData.title}
+            description={displayData.description}
+            id={displayData.id}
+          />
+
+          <WhyItWorksCard
+            whyItWorks={displayData.whyItWorks}
+          />
+
+          <ScoreCard
+            score={displayData.opportunityScore}
+          />
+        </section>
+      </main>
+    </div>
+  );
 }
-
-export default App
