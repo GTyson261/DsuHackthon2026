@@ -1,77 +1,96 @@
 import React, { useState } from 'react';
-import CreateStartupForm from '../startup/CreateStartupForm.jsx';
-import LoadingSpinner from '../shared/LoadingSpinner.jsx';
-import StartupDetails from '../startup/StartupDetails.jsx';
-import { createStartup } from '../services/api.js';
+import GenerateButton from '../shared/GenerateButton.jsx';
+import ErrorMessage from '../shared/ErrorMessage.jsx';
 
-const CreateStartupPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [generatedStartup, setGeneratedStartup] = useState(null);
+const CreateStartupForm = ({ onSubmitStartup, isLoading = false, error = '' }) => {
+  const [formData, setFormData] = useState({
+    disaster: '',
+    industry: '',
+    location: '',
+    details: '',
+  });
 
-  const saveToLocalStorage = (startup) => {
-  const existing = JSON.parse(localStorage.getItem('startups')) || [];
-  const updated = [startup, ...existing];
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
-  localStorage.setItem('startups', JSON.stringify(updated));
-};
-
-  const handleCreateStartup = async (formData) => {
-  setIsLoading(true);
-  setError('');
-  setGeneratedStartup(null);
-
-  const startupPayload = {
-    title: `${formData.disaster} Recovery Network`,
-    problem: `Communities affected by ${formData.disaster} struggle with recovery coordination.`,
-    solution: `A startup platform serving the ${formData.industry} sector in ${
-      formData.location || 'target regions'
-    } by offering response coordination, resource tracking, and recovery planning tools.`,
-    details: formData.details || 'No additional details provided.',
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
-  try {
-    const newStartup = await createStartup(startupPayload);
+  const submitForm = () => {
+    if (!formData.disaster.trim() || !formData.industry.trim()) {
+      return;
+    }
 
-    saveToLocalStorage(newStartup);
-    setGeneratedStartup(newStartup);
+    onSubmitStartup(formData);
+  };
 
-  } catch (err) {
-    const mockStartup = {
-      id: Date.now(),
-      ...startupPayload,
-    };
-
-    saveToLocalStorage(mockStartup);
-    setGeneratedStartup(mockStartup);
-    setError('Backend not connected yet. Showing mock startup result.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    submitForm();
+  };
 
   return (
-    <section className="create-startup-page">
-      <div className="create-startup-page-header">
-        <h1>Create a Startup Opportunity</h1>
-        <p>Enter a disaster or problem and generate a startup concept.</p>
+    <form className="create-startup-form" onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="disaster">Disaster / Problem</label>
+        <input
+          type="text"
+          id="disaster"
+          name="disaster"
+          value={formData.disaster}
+          onChange={handleChange}
+          placeholder="Enter a disaster or major problem"
+        />
       </div>
 
-      <CreateStartupForm
-        onSubmitStartup={handleCreateStartup}
+      <div className="form-group">
+        <label htmlFor="industry">Industry</label>
+        <input
+          type="text"
+          id="industry"
+          name="industry"
+          value={formData.industry}
+          onChange={handleChange}
+          placeholder="Enter a target industry"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          placeholder="Enter a location"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="details">Details</label>
+        <textarea
+          id="details"
+          name="details"
+          value={formData.details}
+          onChange={handleChange}
+          placeholder="Add more context about the problem"
+          rows="4"
+        />
+      </div>
+
+      {error && <ErrorMessage message={error} />}
+
+      <GenerateButton
+        text="Generate Startup Opportunity"
+        onClick={submitForm}
         isLoading={isLoading}
-        error={error}
       />
-
-      {isLoading && (
-        <LoadingSpinner message="Generating startup opportunity..." />
-      )}
-
-      {generatedStartup && !isLoading && (
-        <StartupDetails startup={generatedStartup} />
-      )}
-    </section>
+    </form>
   );
 };
 
-export default CreateStartupPage;
+export default CreateStartupForm;

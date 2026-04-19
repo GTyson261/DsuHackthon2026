@@ -1,84 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import StartupList from '../startup/StartupList.jsx';
 
 const DashboardPage = ({ onLogout }) => {
   const navigate = useNavigate();
-
   const [startups, setStartups] = useState([]);
 
-  // Handles logout button click
+  useEffect(() => {
+    const storedStartups = JSON.parse(localStorage.getItem('startups')) || [];
+    setStartups(storedStartups);
+  }, []);
+
   const handleLogoutClick = () => {
     onLogout();
     navigate('/');
   };
 
-  const goToCreate = () => {
-    navigate('/startups/new');
-  };
-
- const goToViewExample = () => {
-  if (startups.length > 0) {
-    navigate(`/startups/${startups[0].id}`);
-  }
-};
-
-  // Load startups from localStorage when page loads
-  useEffect(() => {
-    const storedStartups =
-      JSON.parse(localStorage.getItem('startups')) || [];
-
-    setStartups(storedStartups);
-  }, []);
-
-  // clear all (useful for testing)
-  const clearStartups = () => {
+  const handleClearStartups = () => {
     localStorage.removeItem('startups');
     setStartups([]);
   };
 
+  const handleSelectStartup = (startup) => {
+    navigate(`/startups/${startup.id}`);
+  };
+
   return (
     <section className="dashboard-page">
-      
-      {/* Header Section */}
       <div className="dashboard-header">
         <h1>Dashboard</h1>
         <p>Welcome to the Disaster → Opportunity Engine</p>
 
-        <button onClick={handleLogoutClick}>
+        <button type="button" onClick={handleLogoutClick}>
           Logout
         </button>
       </div>
 
-      {/* Main Actions */}
       <div className="dashboard-actions">
         <h2>Quick Actions</h2>
 
-        <button onClick={goToCreate}>
-          Create New Startup
-        </button>
+        <Link to="/startups/new">
+          <button type="button">
+            Create New Startup
+          </button>
+        </Link>
 
-        <button onClick={goToViewExample} disabled={startups.length === 0}>
-          View Example Startup
-        </button>
+        {startups.length > 0 ? (
+          <Link to={`/startups/${startups[0].id}`}>
+            <button type="button">
+              View Example Startup
+            </button>
+          </Link>
+        ) : (
+          <button type="button" disabled>
+            View Example Startup
+          </button>
+        )}
 
-        {/* Optional Clear Button */}
-        <button onClick={clearStartups}>
+        <button type="button" onClick={handleClearStartups}>
           Clear All Startups
         </button>
       </div>
 
-      {/* Startup Content */}
       <div className="dashboard-content">
         <h2>Your Startups</h2>
 
         {startups.length === 0 ? (
           <p>No startups yet. Start by creating one!</p>
         ) : (
-          <StartupList startups={startups} />
+          <StartupList
+            startups={startups}
+            onSelectStartup={handleSelectStartup}
+          />
         )}
       </div>
-
     </section>
   );
 };

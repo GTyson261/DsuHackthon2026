@@ -27,7 +27,6 @@ const EditStartupPage = () => {
       );
 
       localStorage.setItem('startups', JSON.stringify(updatedStartups));
-
       navigate(`/startups/${updatedStartup.id}`);
     } catch (err) {
       setError('Failed to save startup changes.');

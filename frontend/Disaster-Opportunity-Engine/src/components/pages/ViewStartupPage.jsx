@@ -20,6 +20,15 @@ const ViewStartupPage = () => {
     navigate('/dashboard');
   };
 
+  const handleDeleteStartup = () => {
+    const updatedStartups = storedStartups.filter(
+      (item) => String(item.id) !== String(id)
+    );
+
+    localStorage.setItem('startups', JSON.stringify(updatedStartups));
+    navigate('/dashboard');
+  };
+
   if (!startup) {
     return (
       <section className="view-startup-page">
@@ -38,18 +47,15 @@ const ViewStartupPage = () => {
       <div className="view-startup-header">
         <h1>View Startup Opportunity</h1>
 
-        <button
-          type="button"
-          className="edit-startup-page-button"
-          onClick={handleEditStartup}
-        >
+        <button type="button" onClick={handleEditStartup}>
           Edit Startup
         </button>
 
-        <button
-          type="button"
-          onClick={handleBackToDashboard}
-        >
+        <button type="button" onClick={handleDeleteStartup}>
+          Delete Startup
+        </button>
+
+        <button type="button" onClick={handleBackToDashboard}>
           Back to Dashboard
         </button>
       </div>
