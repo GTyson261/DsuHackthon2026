@@ -1,96 +1,59 @@
 import React, { useState } from 'react';
-import GenerateButton from '../shared/GenerateButton';
-import ErrorMessage from '../shared/ErrorMessage';
+import CreateStartupForm from '../components/startup/CreateStartupForm';
+import LoadingSpinner from '../components/shared/LoadingSpinner';
+import StartupDetails from '../components/startup/StartupDetails';
 
-const CreateStartupForm = ({ onSubmitStartup, isLoading = false, error = '' }) => {
-  const [formData, setFormData] = useState({
-    disaster: '',
-    industry: '',
-    location: '',
-    details: '',
-  });
+const CreateStartupPage = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [generatedStartup, setGeneratedStartup] = useState(null);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleCreateStartup = (formData) => {
+    setIsLoading(true);
+    setError('');
+    setGeneratedStartup(null);
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
+    setTimeout(() => {
+      try {
+        const mockStartup = {
+          id: Date.now(),
+          title: `${formData.disaster} Recovery Network`,
+          problem: `Communities affected by ${formData.disaster} struggle with recovery coordination.`,
+          solution: `A startup platform serving the ${formData.industry} sector in ${formData.location || 'target regions'} by offering response coordination, resource tracking, and recovery planning tools.`,
+          details: formData.details || 'No additional details provided.',
+        };
 
-  const submitForm = () => {
-    if (!formData.disaster.trim() || !formData.industry.trim()) {
-      return;
-    }
-
-    onSubmitStartup(formData);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    submitForm();
+        setGeneratedStartup(mockStartup);
+      } catch (err) {
+        setError('Failed to generate startup opportunity.');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 1500);
   };
 
   return (
-    <form className="create-startup-form" onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label htmlFor="disaster">Disaster / Problem</label>
-        <input
-          type="text"
-          id="disaster"
-          name="disaster"
-          value={formData.disaster}
-          onChange={handleChange}
-          placeholder="Enter a disaster or major problem"
-        />
+    <section className="create-startup-page">
+      <div className="create-startup-page-header">
+        <h1>Create a Startup Opportunity</h1>
+        <p>Enter a disaster or problem and generate a startup concept.</p>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="industry">Industry</label>
-        <input
-          type="text"
-          id="industry"
-          name="industry"
-          value={formData.industry}
-          onChange={handleChange}
-          placeholder="Enter a target industry"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="location">Location</label>
-        <input
-          type="text"
-          id="location"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          placeholder="Enter a location"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="details">Details</label>
-        <textarea
-          id="details"
-          name="details"
-          value={formData.details}
-          onChange={handleChange}
-          placeholder="Add more context about the problem"
-          rows="4"
-        />
-      </div>
-
-      {error && <ErrorMessage message={error} />}
-
-      <GenerateButton
-        text="Generate Startup Opportunity"
-        onClick={submitForm}
+      <CreateStartupForm
+        onSubmitStartup={handleCreateStartup}
         isLoading={isLoading}
+        error={error}
       />
-    </form>
+
+      {isLoading && (
+        <LoadingSpinner message="Generating startup opportunity..." />
+      )}
+
+      {generatedStartup && !isLoading && (
+        <StartupDetails startup={generatedStartup} />
+      )}
+    </section>
   );
 };
 
-export default CreateStartupForm;
+export default CreateStartupPage;
