@@ -10,6 +10,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class NewsService {
@@ -31,12 +33,27 @@ public class NewsService {
                 return fallbackArticle("Missing NEWS_API_KEY.");
             }
 
+            String query = String.join(" OR ",
+                    "disaster",
+                    "earthquake",
+                    "flood",
+                    "wildfire",
+                    "hurricane",
+                    "tornado",
+                    "storm",
+                    "heatwave",
+                    "drought",
+                    "landslide",
+                    "evacuation",
+                    "outbreak"
+            );
+
             String url = UriComponentsBuilder
                     .fromHttpUrl("https://newsapi.org/v2/everything")
-                    .queryParam("q", "disaster OR earthquake OR flood OR wildfire OR hurricane")
+                    .queryParam("q", query)
                     .queryParam("language", "en")
                     .queryParam("sortBy", "publishedAt")
-                    .queryParam("pageSize", 1)
+                    .queryParam("pageSize", 10)
                     .queryParam("apiKey", newsApiKey)
                     .toUriString();
 
@@ -50,13 +67,13 @@ public class NewsService {
             JsonNode articles = root.path("articles");
 
             if (articles.isArray() && !articles.isEmpty()) {
-                JsonNode first = articles.get(0);
+                JsonNode selected = pickBestArticle(articles);
 
-                String title = first.path("title").asText("Untitled disaster article");
-                String description = first.path("description").asText("No description available.");
-                String source = first.path("source").path("name").asText("Unknown source");
-                String articleUrl = first.path("url").asText("https://example.com");
-                String publishedAtRaw = first.path("publishedAt").asText("");
+                String title = selected.path("title").asText("Untitled live event article");
+                String description = selected.path("description").asText("No description available.");
+                String source = selected.path("source").path("name").asText("Unknown source");
+                String articleUrl = selected.path("url").asText("https://example.com");
+                String publishedAtRaw = selected.path("publishedAt").asText("");
 
                 LocalDateTime publishedAt = LocalDateTime.now();
                 if (!publishedAtRaw.isBlank()) {
@@ -76,7 +93,7 @@ public class NewsService {
                 );
             }
 
-            return fallbackArticle("No disaster articles returned by News API.");
+            return fallbackArticle("No live event articles returned by News API.");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,14 +101,70 @@ public class NewsService {
         }
     }
 
-    private NewsArticle fallbackArticle(String reason) {
-        return new NewsArticle(
-                "Demo Disaster: Flood Crisis",
-                "Heavy flooding has impacted thousands. Fallback article used because: " + reason,
-                "Fallback Source",
-                "https://example.com",
-                LocalDateTime.now()
+    private JsonNode pickBestArticle(JsonNode articles) {
+        List<String> preferredKeywords = List.of(
+                "earthquake",
+                "wildfire",
+                "hurricane",
+                "tornado",
+                "storm",
+                "heatwave",
+                "drought",
+                "landslide",
+                "outbreak",
+                "evacuation",
+                "flood",
+                "disaster"
         );
+
+        for (String keyword : preferredKeywords) {
+            for (JsonNode article : articles) {
+                String title = article.path("title").asText("").toLowerCase();
+                String description = article.path("description").asText("").toLowerCase();
+
+                if (title.contains(keyword) || description.contains(keyword)) {
+                    return article;
+                }
+            }
+        }
+
+        return articles.get(0);
+    }
+
+    private NewsArticle fallbackArticle(String reason) {
+        List<NewsArticle> fallbackArticles = List.of(
+                new NewsArticle(
+                        "Severe Storm Disrupts Regional Transportation",
+                        "High winds and storm damage have delayed travel and strained local response systems. Fallback article used because: " + reason,
+                        "Fallback Source",
+                        "https://example.com",
+                        LocalDateTime.now()
+                ),
+                new NewsArticle(
+                        "Wildfire Smoke Raises Health and Logistics Concerns",
+                        "Air quality issues and evacuations are affecting nearby communities and essential services. Fallback article used because: " + reason,
+                        "Fallback Source",
+                        "https://example.com",
+                        LocalDateTime.now()
+                ),
+                new NewsArticle(
+                        "Heatwave Pressures Energy and Public Safety Resources",
+                        "Extreme temperatures are driving power demand and increasing health risks across the region. Fallback article used because: " + reason,
+                        "Fallback Source",
+                        "https://example.com",
+                        LocalDateTime.now()
+                ),
+                new NewsArticle(
+                        "Earthquake Recovery Efforts Highlight Coordination Gaps",
+                        "Emergency teams are working to restore services and support affected residents after infrastructure damage. Fallback article used because: " + reason,
+                        "Fallback Source",
+                        "https://example.com",
+                        LocalDateTime.now()
+                )
+        );
+
+        int index = ThreadLocalRandom.current().nextInt(fallbackArticles.size());
+        return fallbackArticles.get(index);
     }
 
     public record NewsArticle(
