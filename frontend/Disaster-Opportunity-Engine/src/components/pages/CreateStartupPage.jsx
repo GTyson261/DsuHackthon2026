@@ -11,6 +11,66 @@ const saveToLocalStorage = (startup) => {
   localStorage.setItem('startups', JSON.stringify(updatedStartups));
 };
 
+const calculateScores = (formData) => {
+  let urgencyScore = 5;
+  let marketScore = 5;
+  let feasibilityScore = 5;
+  let impactScore = 5;
+
+  const disasterText = `${formData.disaster} ${formData.details}`.toLowerCase();
+  const industryText = `${formData.industry}`.toLowerCase();
+
+  if (
+    disasterText.includes('fire') ||
+    disasterText.includes('flood') ||
+    disasterText.includes('tornado') ||
+    disasterText.includes('earthquake') ||
+    disasterText.includes('wildfire')
+  ) {
+    urgencyScore += 3;
+    impactScore += 2;
+  }
+
+  if (
+    industryText.includes('health') ||
+    industryText.includes('housing') ||
+    industryText.includes('energy') ||
+    industryText.includes('restaurant') ||
+    industryText.includes('transport')
+  ) {
+    marketScore += 2;
+  }
+
+  if (
+    disasterText.includes('tracking') ||
+    disasterText.includes('planning') ||
+    disasterText.includes('coordination')
+  ) {
+    feasibilityScore += 1;
+  }
+
+    urgencyScore = Math.min(10, urgencyScore);
+    marketScore = Math.min(10, marketScore);
+    feasibilityScore = Math.min(10, feasibilityScore);
+    impactScore = Math.min(10, impactScore);
+
+    const totalScore = Math.round(
+    (
+    urgencyScore * 0.3 +
+    marketScore * 0.25 +
+    feasibilityScore * 0.2 +
+    impactScore * 0.25
+    ) * 4
+    );
+    return {
+    urgencyScore,
+    marketScore,
+    feasibilityScore,
+    impactScore,
+    totalScore,
+  };
+};
+
 const CreateStartupPage = () => {
   const navigate = useNavigate();
 
@@ -23,6 +83,8 @@ const CreateStartupPage = () => {
     setError('');
     setGeneratedStartup(null);
 
+    const scores = calculateScores(formData);
+
     const startupPayload = {
       title: `${formData.disaster} Recovery Network`,
       problem: `Communities affected by ${formData.disaster} struggle with recovery coordination.`,
@@ -33,6 +95,7 @@ const CreateStartupPage = () => {
       location: formData.location || '',
       industry: formData.industry || '',
       disaster: formData.disaster || '',
+      ...scores,
     };
 
     try {

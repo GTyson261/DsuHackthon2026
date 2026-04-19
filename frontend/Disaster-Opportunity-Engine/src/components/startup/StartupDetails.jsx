@@ -1,5 +1,12 @@
 import React from 'react';
 
+const getOpportunityLabel = (score) => {
+  if (score >= 33) return '🔥 High-Potential Startup';
+  if (score >= 26) return '🟢 Good Opportunity';
+  if (score >= 16) return '🟡 Moderate Opportunity';
+  return '🔴 Poor Opportunity';
+};
+
 const StartupDetails = ({ startup }) => {
   if (!startup) {
     return null;
@@ -28,6 +35,7 @@ const StartupDetails = ({ startup }) => {
         <p><strong>Market:</strong> {startup.marketScore ?? 'N/A'}</p>
         <p><strong>Feasibility:</strong> {startup.feasibilityScore ?? 'N/A'}</p>
         <p><strong>Impact:</strong> {startup.impactScore ?? 'N/A'}</p>
+        <p><strong>Rating:</strong>{' '}{startup.totalScore? getOpportunityLabel(startup.totalScore): 'N/A'}</p>
       </div>
     </div>
   );

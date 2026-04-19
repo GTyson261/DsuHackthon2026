@@ -20,11 +20,11 @@ const StartupList = ({ startups = [], onSelectStartup }) => {
           </p>
 
           <p className="startup-list-text">
-            <strong>Total Score:</strong> {startup.totalScore ?? 'N/A'}
+            <strong>Solution:</strong> {startup.solution}
           </p>
 
           <p className="startup-list-text">
-            <strong>Solution:</strong> {startup.solution}
+            <strong>Total Score:</strong> {startup.totalScore ?? 'N/A'}
           </p>
 
           {onSelectStartup && (
