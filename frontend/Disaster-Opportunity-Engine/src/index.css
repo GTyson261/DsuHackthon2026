@@ -284,6 +284,7 @@ button {
   margin: 8px 0 12px;
   background: linear-gradient(135deg, #ffffff, #86e2ff);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -422,6 +423,7 @@ button {
   margin: 0;
   background: linear-gradient(135deg, #ffffff, #9fe8ff);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
