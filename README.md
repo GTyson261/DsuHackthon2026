@@ -235,3 +235,24 @@ Integration with investors/startup platforms
 
 
 The Fidgets
+
+
+
+## 👥 Team
+
+- Glenn Tyson — Database Design & Integration  
+- Bryan — Backend Development & API Implementation  
+- Mesheik — Frontend Development  
+- Amani — Frontend Development  
+
+---
+
+## 👤 My Contributions
+
+For this project, I focused on database design and integration, including:
+
+- Designing and structuring the MySQL database
+- Managing data relationships and storage for user and startup data
+- Supporting backend functionality through database integration
+- Assisting with debugging data flow between backend and database
+- Collaborating with backend and frontend team members to ensure data consistency
